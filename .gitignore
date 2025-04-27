@@ -1,0 +1,18 @@
+# Compiled class files
+*.class
+
+# Logs
+*.log
+
+# IntelliJ
+/.idea
+*.iml
+
+# Maven
+/target
+
+# H2 database files (se usar arquivo)
+/data
+
+# OS files
+.DS_Store
