@@ -1,8 +1,9 @@
 package com.projeto.pokemonapi.service;
 
-import com.projeto.pokemonapi.exception.PokemonNotFoundException;
 import com.projeto.pokemonapi.model.Pokemon;
 import com.projeto.pokemonapi.repository.PokemonRepository;
+import com.projeto.pokemonapi.exception.PokemonNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,36 +11,30 @@ import java.util.List;
 @Service
 public class PokemonService {
 
-    private final PokemonRepository repo;
+    @Autowired
+    private PokemonRepository pokemonRepository;
 
-    public PokemonService(PokemonRepository repo) {
-        this.repo = repo;
+    public List<Pokemon> getAllPokemons() {
+        return pokemonRepository.findAll();
     }
 
-    public Pokemon criar(Pokemon p) {
-        return repo.save(p);
+    public Pokemon getPokemonById(Long id) {
+        return pokemonRepository.findById(id).orElseThrow(() -> new PokemonNotFoundException(id));
     }
 
-    public List<Pokemon> listarTodos() {
-        return repo.findAll();
+    public Pokemon createPokemon(Pokemon pokemon) {
+        return pokemonRepository.save(pokemon);
     }
 
-    public Pokemon buscarPorId(Long id) {
-        return repo.findById(id)
-                .orElseThrow(() -> new PokemonNotFoundException(id));
+    public Pokemon updatePokemon(Long id, Pokemon pokemonDetails) {
+        Pokemon pokemon = getPokemonById(id);
+        pokemon.setName(pokemonDetails.getName());
+        pokemon.setType(pokemonDetails.getType());
+        return pokemonRepository.save(pokemon);
     }
 
-    public Pokemon atualizar(Long id, Pokemon dados) {
-        Pokemon existente = buscarPorId(id);
-        existente.setNome(dados.getNome());
-        existente.setTipo(dados.getTipo());
-        return repo.save(existente);
-    }
-
-    public void deletar(Long id) {
-        if (!repo.existsById(id)) {
-            throw new PokemonNotFoundException(id);
-        }
-        repo.deleteById(id);
+    public void deletePokemon(Long id) {
+        Pokemon pokemon = getPokemonById(id);
+        pokemonRepository.delete(pokemon);
     }
 }
