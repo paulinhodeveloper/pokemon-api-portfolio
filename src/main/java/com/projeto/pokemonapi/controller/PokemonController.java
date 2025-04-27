@@ -2,8 +2,8 @@ package com.projeto.pokemonapi.controller;
 
 import com.projeto.pokemonapi.model.Pokemon;
 import com.projeto.pokemonapi.service.PokemonService;
-import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,37 +12,36 @@ import java.util.List;
 @RequestMapping("/api/pokemons")
 public class PokemonController {
 
-    private final PokemonService service;
-
-    public PokemonController(PokemonService service) {
-        this.service = service;
-    }
-
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Pokemon criar(@Valid @RequestBody Pokemon p) {
-        return service.criar(p);
-    }
+    @Autowired
+    private PokemonService pokemonService;
 
     @GetMapping
-    public List<Pokemon> listar() {
-        return service.listarTodos();
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public List<Pokemon> getAllPokemons() {
+        return pokemonService.getAllPokemons();
     }
 
     @GetMapping("/{id}")
-    public Pokemon obter(@PathVariable Long id) {
-        return service.buscarPorId(id);
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public Pokemon getPokemonById(@PathVariable Long id) {
+        return pokemonService.getPokemonById(id);
+    }
+
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public Pokemon createPokemon(@RequestBody Pokemon pokemon) {
+        return pokemonService.createPokemon(pokemon);
     }
 
     @PutMapping("/{id}")
-    public Pokemon atualizar(@PathVariable Long id,
-                             @Valid @RequestBody Pokemon p) {
-        return service.atualizar(id, p);
+    @PreAuthorize("hasRole('ADMIN')")
+    public Pokemon updatePokemon(@PathVariable Long id, @RequestBody Pokemon pokemon) {
+        return pokemonService.updatePokemon(id, pokemon);
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deletar(@PathVariable Long id) {
-        service.deletar(id);
+    @PreAuthorize("hasRole('ADMIN')")
+    public void deletePokemon(@PathVariable Long id) {
+        pokemonService.deletePokemon(id);
     }
 }
